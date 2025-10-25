@@ -11,6 +11,7 @@ import android.view.ViewGroup
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.ca1giftcardwr.R
@@ -18,6 +19,7 @@ import com.example.ca1giftcardwr.databinding.CardGiftcardBinding
 import com.example.ca1giftcardwr.databinding.GiftcardListBinding
 import com.example.ca1giftcardwr.main.MainApp
 import com.example.ca1giftcardwr.models.GiftCardModel
+import com.google.android.material.snackbar.Snackbar
 
 interface GiftCardListener {
     fun onGiftCardClick(giftCard: GiftCardModel)
@@ -39,6 +41,35 @@ class GiftcardList : AppCompatActivity(), GiftCardListener {
 
         val layoutManager = LinearLayoutManager(this)
         binding.recyclerView.layoutManager = layoutManager
+
+        val itemTouchHelper = ItemTouchHelper(object : ItemTouchHelper.SimpleCallback(
+            0, ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT
+        ) {
+            override fun onMove(
+                recyclerView: RecyclerView,
+                viewHolder: RecyclerView.ViewHolder,
+                target: RecyclerView.ViewHolder
+            ): Boolean {
+                return false
+            }
+
+            override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+                val position = viewHolder.bindingAdapterPosition
+                val cards = app.findAll() as ArrayList<GiftCardModel>
+                val deletedCard = cards[position]
+
+                app.delete(deletedCard)
+                loadGiftCards()
+
+                Snackbar.make(binding.root, "Card deleted", Snackbar.LENGTH_LONG)
+                    .setAction("UNDO") {
+                        app.add(deletedCard)
+                        loadGiftCards()
+                    }
+                    .show()
+            }
+        })
+        itemTouchHelper.attachToRecyclerView(binding.recyclerView)
 
         loadGiftCards()
         registerRefreshCallback()
@@ -71,6 +102,7 @@ class GiftcardList : AppCompatActivity(), GiftCardListener {
         }
         return super.onOptionsItemSelected(item)
     }
+
     private fun registerRefreshCallback() {
         refreshIntentLauncher =
             registerForActivityResult(
@@ -90,7 +122,6 @@ class GiftcardList : AppCompatActivity(), GiftCardListener {
     }
 }
 
-// Adapter for RecyclerView
 class GiftCardAdapter(
     private var giftCards: List<GiftCardModel>,
     private val listener: GiftCardListener
