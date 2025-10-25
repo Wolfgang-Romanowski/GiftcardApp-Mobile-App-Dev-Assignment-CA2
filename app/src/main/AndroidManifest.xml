@@ -24,7 +24,13 @@
                 android:name=".activities.GiftCardAdd"
                 android:exported="false"
                 android:theme="@style/Theme.CA1GiftCardWR" />
+        <activity
+                android:name=".activities.GiftCardEdit"
+                android:exported="false"
+                android:theme="@style/Theme.CA1GiftCardWR" />
 
     </application>
+
+
 
 </manifest>

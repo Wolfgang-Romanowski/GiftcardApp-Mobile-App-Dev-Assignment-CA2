@@ -1,6 +1,7 @@
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
+    id("kotlin-parcelize")
 }
 
 android {
@@ -41,6 +42,7 @@ android {
 
 dependencies {
     implementation("com.jakewharton.timber:timber:5.0.1")
+    implementation("com.google.code.gson:gson:2.10.1")
 
     implementation("androidx.core:core-ktx:1.12.0")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0")

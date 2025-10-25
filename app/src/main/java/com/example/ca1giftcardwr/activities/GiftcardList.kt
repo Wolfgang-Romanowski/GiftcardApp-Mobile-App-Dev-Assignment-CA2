@@ -1,5 +1,6 @@
 package com.example.ca1giftcardwr.activities
 
+import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -10,19 +11,27 @@ import android.view.ViewGroup
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.ca1giftcardwr.R
-import com.example.ca1giftcardwr.databinding.GiftcardListBinding
 import com.example.ca1giftcardwr.databinding.CardGiftcardBinding
+import com.example.ca1giftcardwr.databinding.GiftcardListBinding
 import com.example.ca1giftcardwr.main.MainApp
 import com.example.ca1giftcardwr.models.GiftCardModel
+import com.google.android.material.snackbar.Snackbar
 
-class GiftcardList : AppCompatActivity() {
+interface GiftCardListener {
+    fun onGiftCardClick(giftCard: GiftCardModel)
+}
+
+class GiftcardList : AppCompatActivity(), GiftCardListener {
 
     lateinit var app: MainApp
     private lateinit var binding: GiftcardListBinding
     private lateinit var refreshIntentLauncher: ActivityResultLauncher<Intent>
+    private var searchQuery = ""
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -35,25 +44,82 @@ class GiftcardList : AppCompatActivity() {
         val layoutManager = LinearLayoutManager(this)
         binding.recyclerView.layoutManager = layoutManager
 
+        val itemTouchHelper = ItemTouchHelper(object : ItemTouchHelper.SimpleCallback(
+            0, ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT
+        ) {
+            override fun onMove(
+                recyclerView: RecyclerView,
+                viewHolder: RecyclerView.ViewHolder,
+                target: RecyclerView.ViewHolder
+            ): Boolean {
+                return false
+            }
+
+            override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+                val position = viewHolder.bindingAdapterPosition
+                val cards = app.findAll() as ArrayList<GiftCardModel>
+                val deletedCard = cards[position]
+
+                app.delete(deletedCard)
+                loadGiftCards()
+
+                Snackbar.make(binding.root, "Card deleted", Snackbar.LENGTH_LONG)
+                    .setAction("UNDO") {
+                        app.add(deletedCard)
+                        loadGiftCards()
+                    }
+                    .show()
+            }
+        })
+        itemTouchHelper.attachToRecyclerView(binding.recyclerView)
+
         loadGiftCards()
         registerRefreshCallback()
     }
 
     private fun loadGiftCards() {
-        val cards = app.findAll()
+        filterGiftCards()
+    }
 
-        if (cards.isEmpty()) {
+    private fun filterGiftCards() {
+        val allCards = app.findAll()
+        val filteredCards = if (searchQuery.isEmpty()) {
+            allCards
+        } else {
+            allCards.filter { card ->
+                card.storeName.contains(searchQuery, ignoreCase = true) ||
+                        card.cardNumber.contains(searchQuery, ignoreCase = true)
+            }
+        }
+
+        if (filteredCards.isEmpty()) {
             binding.recyclerView.visibility = View.GONE
             binding.emptyView.visibility = View.VISIBLE
         } else {
             binding.recyclerView.visibility = View.VISIBLE
             binding.emptyView.visibility = View.GONE
-            binding.recyclerView.adapter = GiftCardAdapter(cards)
+            binding.recyclerView.adapter = GiftCardAdapter(filteredCards, this)
         }
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.menu_main, menu)
+
+        val searchItem = menu.findItem(R.id.item_search)
+        val searchView = searchItem.actionView as androidx.appcompat.widget.SearchView
+
+        searchView.setOnQueryTextListener(object : androidx.appcompat.widget.SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String?): Boolean {
+                return false
+            }
+
+            override fun onQueryTextChange(newText: String?): Boolean {
+                searchQuery = newText ?: ""
+                filterGiftCards()
+                return true
+            }
+        })
+
         return super.onCreateOptionsMenu(menu)
     }
 
@@ -71,15 +137,25 @@ class GiftcardList : AppCompatActivity() {
         refreshIntentLauncher =
             registerForActivityResult(
                 ActivityResultContracts.StartActivityForResult()
-            ) {
-                loadGiftCards()
+            ) { result ->
+                if (result.resultCode == RESULT_OK) {
+                    loadGiftCards()
+                }
             }
+    }
+
+    override fun onGiftCardClick(giftCard: GiftCardModel) {
+        val intent = Intent(this, GiftCardEdit::class.java).apply {
+            putExtra("gift_card", giftCard)
+        }
+        refreshIntentLauncher.launch(intent)
     }
 }
 
-// Adapter for RecyclerView
-class GiftCardAdapter(private var giftCards: List<GiftCardModel>) :
-    RecyclerView.Adapter<GiftCardAdapter.MainHolder>() {
+class GiftCardAdapter(
+    private var giftCards: List<GiftCardModel>,
+    private val listener: GiftCardListener
+) : RecyclerView.Adapter<GiftCardAdapter.MainHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MainHolder {
         val binding = CardGiftcardBinding
@@ -88,7 +164,7 @@ class GiftCardAdapter(private var giftCards: List<GiftCardModel>) :
 
     override fun onBindViewHolder(holder: MainHolder, position: Int) {
         val giftCard = giftCards[holder.bindingAdapterPosition]
-        holder.bind(giftCard)
+        holder.bind(giftCard, listener)
 
         holder.itemView.alpha = 0f
         holder.itemView.animate()
@@ -102,13 +178,17 @@ class GiftCardAdapter(private var giftCards: List<GiftCardModel>) :
     class MainHolder(private val binding: CardGiftcardBinding) :
         RecyclerView.ViewHolder(binding.root) {
 
-        fun bind(giftCard: GiftCardModel) {
+        fun bind(giftCard: GiftCardModel, listener: GiftCardListener) {
             binding.giftCardStore.text = giftCard.storeName
             binding.giftCardBalance.text = "$${String.format("%.2f", giftCard.balance)}"
             binding.giftCardExpiry.text = if (giftCard.expiryDate.isNotEmpty()) {
                 "Expires: ${giftCard.expiryDate}"
             } else {
                 "No expiry date"
+            }
+
+            binding.root.setOnClickListener {
+                listener.onGiftCardClick(giftCard)
             }
         }
     }
