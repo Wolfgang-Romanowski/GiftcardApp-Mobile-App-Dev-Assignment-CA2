@@ -1,5 +1,9 @@
 package com.example.ca1giftcardwr.models
 
+import android.os.Parcelable
+import kotlinx.parcelize.Parcelize
+
+@Parcelize
 data class GiftCardModel(
     var id: Long = 0,
     var storeName: String = "",
@@ -7,4 +11,4 @@ data class GiftCardModel(
     var cardNumber: String = "",
     var expiryDate: String = "",
     var notes: String = ""
-)
+) : Parcelable
