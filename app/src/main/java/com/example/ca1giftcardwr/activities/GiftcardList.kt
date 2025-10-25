@@ -1,5 +1,6 @@
 package com.example.ca1giftcardwr.activities
 
+import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -13,12 +14,16 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.ca1giftcardwr.R
-import com.example.ca1giftcardwr.databinding.GiftcardListBinding
 import com.example.ca1giftcardwr.databinding.CardGiftcardBinding
+import com.example.ca1giftcardwr.databinding.GiftcardListBinding
 import com.example.ca1giftcardwr.main.MainApp
 import com.example.ca1giftcardwr.models.GiftCardModel
 
-class GiftcardList : AppCompatActivity() {
+interface GiftCardListener {
+    fun onGiftCardClick(giftCard: GiftCardModel)
+}
+
+class GiftcardList : AppCompatActivity(), GiftCardListener {
 
     lateinit var app: MainApp
     private lateinit var binding: GiftcardListBinding
@@ -48,7 +53,7 @@ class GiftcardList : AppCompatActivity() {
         } else {
             binding.recyclerView.visibility = View.VISIBLE
             binding.emptyView.visibility = View.GONE
-            binding.recyclerView.adapter = GiftCardAdapter(cards)
+            binding.recyclerView.adapter = GiftCardAdapter(cards, this)
         }
     }
 
@@ -66,29 +71,40 @@ class GiftcardList : AppCompatActivity() {
         }
         return super.onOptionsItemSelected(item)
     }
-
     private fun registerRefreshCallback() {
         refreshIntentLauncher =
             registerForActivityResult(
                 ActivityResultContracts.StartActivityForResult()
-            ) {
-                loadGiftCards()
+            ) { result ->
+                if (result.resultCode == Activity.RESULT_OK) {
+                    loadGiftCards()
+                }
             }
+    }
+
+    override fun onGiftCardClick(giftCard: GiftCardModel) {
+        val intent = Intent(this, GiftCardEdit::class.java).apply {
+            putExtra("gift_card", giftCard)
+        }
+        refreshIntentLauncher.launch(intent)
     }
 }
 
 // Adapter for RecyclerView
-class GiftCardAdapter(private var giftCards: List<GiftCardModel>) :
-    RecyclerView.Adapter<GiftCardAdapter.MainHolder>() {
+class GiftCardAdapter(
+    private var giftCards: List<GiftCardModel>,
+    private val listener: GiftCardListener
+) : RecyclerView.Adapter<GiftCardAdapter.MainHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MainHolder {
         val binding = CardGiftcardBinding
             .inflate(LayoutInflater.from(parent.context), parent, false)
-        return MainHolder(binding) }
+        return MainHolder(binding)
+    }
 
     override fun onBindViewHolder(holder: MainHolder, position: Int) {
         val giftCard = giftCards[holder.bindingAdapterPosition]
-        holder.bind(giftCard)
+        holder.bind(giftCard, listener)
 
         holder.itemView.alpha = 0f
         holder.itemView.animate()
@@ -102,13 +118,17 @@ class GiftCardAdapter(private var giftCards: List<GiftCardModel>) :
     class MainHolder(private val binding: CardGiftcardBinding) :
         RecyclerView.ViewHolder(binding.root) {
 
-        fun bind(giftCard: GiftCardModel) {
+        fun bind(giftCard: GiftCardModel, listener: GiftCardListener) {
             binding.giftCardStore.text = giftCard.storeName
             binding.giftCardBalance.text = "$${String.format("%.2f", giftCard.balance)}"
             binding.giftCardExpiry.text = if (giftCard.expiryDate.isNotEmpty()) {
                 "Expires: ${giftCard.expiryDate}"
             } else {
                 "No expiry date"
+            }
+
+            binding.root.setOnClickListener {
+                listener.onGiftCardClick(giftCard)
             }
         }
     }

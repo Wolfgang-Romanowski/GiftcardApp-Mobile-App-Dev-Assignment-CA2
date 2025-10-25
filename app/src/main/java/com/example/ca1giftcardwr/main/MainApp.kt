@@ -16,15 +16,11 @@ class MainApp : Application() {
         super.onCreate()
         Timber.plant(Timber.DebugTree())
         store = GiftCardStore(applicationContext)
-
-        // Load saved cards
         giftCards.addAll(store.load())
 
-        // Set nextId based on existing cards
         if (giftCards.isNotEmpty()) {
             nextId = giftCards.maxOf { it.id } + 1
         }
-
         i("Giftcard manager started with ${giftCards.size} cards")
     }
 
