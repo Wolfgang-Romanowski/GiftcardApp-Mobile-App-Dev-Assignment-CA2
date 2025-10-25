@@ -1,4 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">CA1GiftCardWR</string>
+    <string name="app_name">Gift Card App</string>
+    <string name="add_gift_card">Add Gift Card</string>
+    <string name="menu_add">Add</string>
+
+    <string name="store_name_hint">Store Name</string>
+    <string name="balance_hint">Balance</string>
+    <string name="card_number_hint">Card Number</string>
+    <string name="expiry_hint">Expiry Date (MM/YYYY)</string>
+    <string name="notes_hint">Notes</string>
+
+    <string name="error_validation">Please enter store name and balance</string>
+    <string name="appbar_scrolling_view_behavior">com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior</string>
 </resources>
