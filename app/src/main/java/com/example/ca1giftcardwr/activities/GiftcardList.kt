@@ -30,6 +30,8 @@ class GiftcardList : AppCompatActivity(), GiftCardListener {
     lateinit var app: MainApp
     private lateinit var binding: GiftcardListBinding
     private lateinit var refreshIntentLauncher: ActivityResultLauncher<Intent>
+    private var searchQuery = ""
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -76,20 +78,48 @@ class GiftcardList : AppCompatActivity(), GiftCardListener {
     }
 
     private fun loadGiftCards() {
-        val cards = app.findAll()
+        filterGiftCards()
+    }
 
-        if (cards.isEmpty()) {
+    private fun filterGiftCards() {
+        val allCards = app.findAll()
+        val filteredCards = if (searchQuery.isEmpty()) {
+            allCards
+        } else {
+            allCards.filter { card ->
+                card.storeName.contains(searchQuery, ignoreCase = true) ||
+                        card.cardNumber.contains(searchQuery, ignoreCase = true)
+            }
+        }
+
+        if (filteredCards.isEmpty()) {
             binding.recyclerView.visibility = View.GONE
             binding.emptyView.visibility = View.VISIBLE
         } else {
             binding.recyclerView.visibility = View.VISIBLE
             binding.emptyView.visibility = View.GONE
-            binding.recyclerView.adapter = GiftCardAdapter(cards, this)
+            binding.recyclerView.adapter = GiftCardAdapter(filteredCards, this)
         }
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.menu_main, menu)
+
+        val searchItem = menu.findItem(R.id.item_search)
+        val searchView = searchItem.actionView as androidx.appcompat.widget.SearchView
+
+        searchView.setOnQueryTextListener(object : androidx.appcompat.widget.SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String?): Boolean {
+                return false
+            }
+
+            override fun onQueryTextChange(newText: String?): Boolean {
+                searchQuery = newText ?: ""
+                filterGiftCards()
+                return true
+            }
+        })
+
         return super.onCreateOptionsMenu(menu)
     }
 
@@ -108,7 +138,7 @@ class GiftcardList : AppCompatActivity(), GiftCardListener {
             registerForActivityResult(
                 ActivityResultContracts.StartActivityForResult()
             ) { result ->
-                if (result.resultCode == Activity.RESULT_OK) {
+                if (result.resultCode == RESULT_OK) {
                     loadGiftCards()
                 }
             }
@@ -130,8 +160,7 @@ class GiftCardAdapter(
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MainHolder {
         val binding = CardGiftcardBinding
             .inflate(LayoutInflater.from(parent.context), parent, false)
-        return MainHolder(binding)
-    }
+        return MainHolder(binding) }
 
     override fun onBindViewHolder(holder: MainHolder, position: Int) {
         val giftCard = giftCards[holder.bindingAdapterPosition]
