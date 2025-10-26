@@ -7,6 +7,8 @@ import com.example.ca1giftcardwr.main.MainApp
 import com.example.ca1giftcardwr.models.GiftCardModel
 import com.google.android.material.snackbar.Snackbar
 import timber.log.Timber.Forest.i
+import android.app.DatePickerDialog
+import java.util.Calendar
 
 class GiftCardAdd : AppCompatActivity() {
 
@@ -22,6 +24,10 @@ class GiftCardAdd : AppCompatActivity() {
         app = application as MainApp
 
         setSupportActionBar(binding.toolbarAdd)
+
+
+        binding.giftCardExpiry.setOnClickListener {
+            showDatePicker() }
 
         binding.btnAdd.setOnClickListener {
             giftCard.storeName = binding.giftCardStore.text.toString()
@@ -51,5 +57,25 @@ class GiftCardAdd : AppCompatActivity() {
                     .show()
             }
         }
+    }
+
+    private fun showDatePicker() {
+        val calendar = Calendar.getInstance()
+        val year = calendar.get(Calendar.YEAR)
+        val month = calendar.get(Calendar.MONTH)
+        val day = calendar.get(Calendar.DAY_OF_MONTH)
+
+        val datePickerDialog = DatePickerDialog(
+            this,
+            { _, selectedYear, selectedMonth, _ ->
+                val formattedDate = String.format("%02d/%04d", selectedMonth + 1, selectedYear)
+                binding.giftCardExpiry.setText(formattedDate)
+            },
+            year,
+            month,
+            day
+        )
+
+        datePickerDialog.show()
     }
 }
