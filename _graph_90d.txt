@@ -1,0 +1,36 @@
+*   cbdaf72 (HEAD -> feature/advanced-ui, tag: v0.6.0, develop) Merge branch 'feature/unit-tests' into develop
+|\  
+| * cb0fd4a (feature/unit-tests) unit tests for models added
+|/  
+| *   6c243a9 (tag: v0.5.0, origin/main, origin/HEAD, main) Merge branch 'develop' into main
+| |\  
+| |/  
+|/|   
+| | *   b51ef3f (tag: v0.4.1) Merge branch 'feature/search' into develop
+| | |\  
+| |_|/  
+|/| |   
+* | | 9d37686 (tag: dev-0005) Add search+filter
+| |/  
+|/|   
+* |   64f969f (tag: v0.4.0, origin/develop) Merge branch 'feature/swipe-delete' into develop
+|\ \  
+| * | 51b3ac4 (tag: dev-0004) Add swipe-to-delete with undo functionality
+|/ /  
+* |   8869cc5 (tag: v0.3.3) Merge branch 'feature/edit-cards' into develop
+|\ \  
+| * | ba1da62 (tag: dev-0003) Add edit and delete functionality for gift cards
+|/ /  
+* |   10782ba (tag: v0.3.2) Merge branch 'feature/persistence' into develop
+|\ \  
+| * | b1f7f27 (tag: dev-0002) feat(persistence): Add SharedPreferences for data persistence
+|/ /  
+* |   d6a15a1 (tag: v0.3.1) Merge branch 'feature/parcelable' into develop
+|\ \  
+| |/  
+|/|   
+| * 54dffec (tag: dev-0001) GiftcardModel parcelable
+|/  
+* 1d031d7 (tag: v0.3.0) Base Giftcard App done, Added: model, activities & layout
+* f72ae4d (tag: v0.2.0) Mobile functionality ready
+* 3f6fa92 (tag: v0.1.0) Initial commit
