@@ -1,6 +1,5 @@
 package com.example.ca1giftcardwr.activities
 
-import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -10,7 +9,9 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.GravityCompat
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -19,19 +20,21 @@ import com.example.ca1giftcardwr.databinding.CardGiftcardBinding
 import com.example.ca1giftcardwr.databinding.GiftcardListBinding
 import com.example.ca1giftcardwr.main.MainApp
 import com.example.ca1giftcardwr.models.GiftCardModel
+import com.google.android.material.navigation.NavigationView
 import com.google.android.material.snackbar.Snackbar
 
 interface GiftCardListener {
     fun onGiftCardClick(giftCard: GiftCardModel)
 }
 
-class GiftcardList : AppCompatActivity(), GiftCardListener {
+class GiftcardList : AppCompatActivity(), GiftCardListener,
+    NavigationView.OnNavigationItemSelectedListener {
 
     lateinit var app: MainApp
     private lateinit var binding: GiftcardListBinding
     private lateinit var refreshIntentLauncher: ActivityResultLauncher<Intent>
+    private lateinit var drawerToggle: ActionBarDrawerToggle
     private var searchQuery = ""
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -41,9 +44,13 @@ class GiftcardList : AppCompatActivity(), GiftCardListener {
         app = application as MainApp
         setSupportActionBar(binding.toolbar)
 
+        setupNavigationDrawer()
+
         val layoutManager = LinearLayoutManager(this)
         binding.recyclerView.layoutManager = layoutManager
 
+
+        // Swipe to delete
         val itemTouchHelper = ItemTouchHelper(object : ItemTouchHelper.SimpleCallback(
             0, ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT
         ) {
@@ -51,9 +58,7 @@ class GiftcardList : AppCompatActivity(), GiftCardListener {
                 recyclerView: RecyclerView,
                 viewHolder: RecyclerView.ViewHolder,
                 target: RecyclerView.ViewHolder
-            ): Boolean {
-                return false
-            }
+            ): Boolean = false
 
             override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
                 val position = viewHolder.bindingAdapterPosition
@@ -75,6 +80,45 @@ class GiftcardList : AppCompatActivity(), GiftCardListener {
 
         loadGiftCards()
         registerRefreshCallback()
+    }
+
+    private fun setupNavigationDrawer() {
+        drawerToggle = ActionBarDrawerToggle(
+            this,
+            binding.drawerLayout,
+            binding.toolbar,
+            R.string.nav_open,
+            R.string.nav_close
+        )
+        binding.drawerLayout.addDrawerListener(drawerToggle)
+        drawerToggle.syncState()
+
+        binding.navView.setNavigationItemSelectedListener(this)
+    }
+
+    override fun onNavigationItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
+            R.id.nav_cards -> {}
+            R.id.nav_add -> {
+                val intent = Intent(this, GiftCardAdd::class.java)
+                refreshIntentLauncher.launch(intent)
+            }
+            R.id.nav_about -> {
+                Snackbar.make(binding.root, "Gift Card Manager v2.0", Snackbar.LENGTH_SHORT).show()
+            }
+        }
+        binding.drawerLayout.closeDrawer(GravityCompat.START)
+        return true
+    }
+
+    @Deprecated("Deprecated in Java")
+    override fun onBackPressed() {
+        if (binding.drawerLayout.isDrawerOpen(GravityCompat.START)) {
+            binding.drawerLayout.closeDrawer(GravityCompat.START)
+        } else {
+            @Suppress("DEPRECATION")
+            super.onBackPressed()
+        }
     }
 
     private fun loadGiftCards() {
@@ -109,9 +153,7 @@ class GiftcardList : AppCompatActivity(), GiftCardListener {
         val searchView = searchItem.actionView as androidx.appcompat.widget.SearchView
 
         searchView.setOnQueryTextListener(object : androidx.appcompat.widget.SearchView.OnQueryTextListener {
-            override fun onQueryTextSubmit(query: String?): Boolean {
-                return false
-            }
+            override fun onQueryTextSubmit(query: String?): Boolean = false
 
             override fun onQueryTextChange(newText: String?): Boolean {
                 searchQuery = newText ?: ""
@@ -124,6 +166,9 @@ class GiftcardList : AppCompatActivity(), GiftCardListener {
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        if (drawerToggle.onOptionsItemSelected(item)) {
+            return true
+        }
         when (item.itemId) {
             R.id.item_add -> {
                 val launcherIntent = Intent(this, GiftCardAdd::class.java)
@@ -135,9 +180,7 @@ class GiftcardList : AppCompatActivity(), GiftCardListener {
 
     private fun registerRefreshCallback() {
         refreshIntentLauncher =
-            registerForActivityResult(
-                ActivityResultContracts.StartActivityForResult()
-            ) { result ->
+            registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
                 if (result.resultCode == RESULT_OK) {
                     loadGiftCards()
                 }
@@ -160,7 +203,8 @@ class GiftCardAdapter(
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MainHolder {
         val binding = CardGiftcardBinding
             .inflate(LayoutInflater.from(parent.context), parent, false)
-        return MainHolder(binding) }
+        return MainHolder(binding)
+    }
 
     override fun onBindViewHolder(holder: MainHolder, position: Int) {
         val giftCard = giftCards[holder.bindingAdapterPosition]

@@ -2,59 +2,45 @@ package com.example.ca1giftcardwr.main
 
 import android.app.Application
 import com.example.ca1giftcardwr.models.GiftCardModel
-import com.example.ca1giftcardwr.models.GiftCardStore
+import com.example.ca1giftcardwr.models.GiftCardJSONStore
 import timber.log.Timber
 import timber.log.Timber.Forest.i
 
 class MainApp : Application() {
 
-    lateinit var store: GiftCardStore
-    val giftCards = ArrayList<GiftCardModel>()
-    private var nextId = 1L
+    lateinit var giftCardStore: GiftCardJSONStore
 
     override fun onCreate() {
         super.onCreate()
         Timber.plant(Timber.DebugTree())
-        store = GiftCardStore(applicationContext)
-        giftCards.addAll(store.load())
+        giftCardStore = GiftCardJSONStore(applicationContext)
+        i("Gift Card Manager started with ${giftCardStore.findAll().size} cards")
+    }
 
-        if (giftCards.isNotEmpty()) {
-            nextId = giftCards.maxOf { it.id } + 1
-        }
-        i("Giftcard manager started with ${giftCards.size} cards")
+    fun findAll(): List<GiftCardModel> {
+        return giftCardStore.findAll()
+    }
+
+    fun findById(id: Long): GiftCardModel? {
+        return giftCardStore.findOne(id)
     }
 
     fun add(giftCard: GiftCardModel) {
-        giftCard.id = nextId++
-        giftCards.add(giftCard)
-        store.save(giftCards)
+        giftCardStore.create(giftCard)
         logAll()
     }
 
     fun update(giftCard: GiftCardModel) {
-        val index = giftCards.indexOfFirst { it.id == giftCard.id }
-        if (index != -1) {
-            giftCards[index] = giftCard
-            store.save(giftCards)
-            logAll()
-        }
-    }
-
-    fun delete(giftCard: GiftCardModel) {
-        giftCards.remove(giftCard)
-        store.save(giftCards)
+        giftCardStore.update(giftCard)
         logAll()
     }
 
-    fun findAll(): List<GiftCardModel> {
-        return giftCards
-    }
-
-    fun findById(id: Long): GiftCardModel? {
-        return giftCards.find { it.id == id }
+    fun delete(giftCard: GiftCardModel) {
+        giftCardStore.delete(giftCard)
+        logAll()
     }
 
     private fun logAll() {
-        giftCards.forEach { i("Gift Card: $it") }
+        giftCardStore.findAll().forEach { i("Gift Card: $it") }
     }
 }
