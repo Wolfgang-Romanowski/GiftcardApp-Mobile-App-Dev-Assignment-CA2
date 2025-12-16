@@ -4,6 +4,9 @@
     <string name="add_gift_card">Add Gift Card</string>
     <string name="menu_add">Add</string>
 
+    <string name="nav_open">Open navigation drawer</string>
+    <string name="nav_close">Close navigation drawer</string>
+
     <string name="store_name_hint">Store Name</string>
     <string name="balance_hint">Balance</string>
     <string name="card_number_hint">Card Number</string>
