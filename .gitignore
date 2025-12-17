@@ -3,3 +3,7 @@
 */build/
 *.iml
 local.properties
+app/src/main/res/values/keys.xml
+
+# secrets
+app/src/main/res/values/keys.xml
