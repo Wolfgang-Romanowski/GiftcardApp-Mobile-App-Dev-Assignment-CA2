@@ -34,8 +34,9 @@ class GiftCardListPresenter(private val view: GiftCardListView) {
     }
 
     fun doAddGiftCard() {
-        val launcherIntent = Intent(view, GiftCardAddView::class.java)
-        refreshIntentLauncher.launch(launcherIntent)
+        val intent = Intent(view, GiftCardAddView::class.java)
+        view.startActivity(intent)
+        view.overridePendingTransition(android.R.anim.slide_in_left, android.R.anim.slide_out_right)
     }
 
     fun doEditGiftCard(giftCard: GiftCardModel) {
@@ -43,6 +44,7 @@ class GiftCardListPresenter(private val view: GiftCardListView) {
             putExtra("gift_card", giftCard)
         }
         refreshIntentLauncher.launch(launcherIntent)
+        view.overridePendingTransition(android.R.anim.slide_in_left, android.R.anim.slide_out_right)
     }
 
     fun doDeleteGiftCard(giftCard: GiftCardModel) {

@@ -135,4 +135,9 @@ class EditLocationView : AppCompatActivity(),
         marker.snippet = "GPS: ${location.lat}, ${location.lng}"
         return false
     }
+
+    override fun finish() {
+        super.finish()
+        overridePendingTransition(android.R.anim.slide_in_left, android.R.anim.slide_out_right)
+    }
 }
