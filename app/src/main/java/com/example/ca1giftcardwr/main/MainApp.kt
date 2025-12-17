@@ -1,6 +1,7 @@
 package com.example.ca1giftcardwr.main
 
 import android.app.Application
+import androidx.appcompat.app.AppCompatDelegate
 import com.example.ca1giftcardwr.models.GiftCardModel
 import com.example.ca1giftcardwr.models.GiftCardJSONStore
 import timber.log.Timber
@@ -15,6 +16,10 @@ class MainApp : Application() {
         Timber.plant(Timber.DebugTree())
         giftCardStore = GiftCardJSONStore(applicationContext)
         i("Gift Card Manager started with ${giftCardStore.findAll().size} cards")
+
+        val prefs = getSharedPreferences("app_prefs", MODE_PRIVATE)
+        val nightMode = prefs.getInt("night_mode", AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
+        AppCompatDelegate.setDefaultNightMode(nightMode)
     }
 
     fun findAll(): List<GiftCardModel> {

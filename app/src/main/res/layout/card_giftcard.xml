@@ -26,8 +26,7 @@
                 app:cardElevation="0dp"
                 app:cardBackgroundColor="@color/card_icon_background"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintBottom_toBottomOf="parent">
+                app:layout_constraintTop_toTopOf="parent">
 
             <TextView
                     android:id="@+id/storeInitial"
@@ -38,6 +37,14 @@
                     android:textSize="24sp"
                     android:textStyle="bold"
                     tools:text="A" />
+
+            <ImageView
+                    android:id="@+id/storeImage"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:scaleType="centerCrop"
+                    android:visibility="gone"
+                    android:contentDescription="Store image" />
 
         </androidx.cardview.widget.CardView>
 
@@ -91,8 +98,22 @@
                 app:layout_constraintStart_toEndOf="@id/storeIconCard"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/giftCardNumber"
-                app:layout_constraintBottom_toBottomOf="@id/storeIconCard"
                 tools:text="Expires: 12/2025" />
+
+        <TextView
+                android:id="@+id/giftCardLocation"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="4dp"
+                android:textSize="12sp"
+                android:textColor="?attr/colorOnSurface"
+                android:visibility="gone"
+                app:layout_constraintStart_toEndOf="@id/storeIconCard"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/giftCardExpiry"
+                tools:text="📍 Dublin, Ireland"
+                tools:visibility="visible" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.cardview.widget.CardView>
