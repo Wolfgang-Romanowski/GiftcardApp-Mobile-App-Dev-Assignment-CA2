@@ -10,7 +10,7 @@ import android.view.View
 import android.view.animation.OvershootInterpolator
 import androidx.appcompat.app.AppCompatActivity
 import com.example.ca1giftcardwr.databinding.ActivitySplashBinding
-
+import com.example.ca1giftcardwr.views.giftcardlist.GiftCardListView
 class SplashActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivitySplashBinding
@@ -24,7 +24,7 @@ class SplashActivity : AppCompatActivity() {
         animateSplash()
 
         Handler(Looper.getMainLooper()).postDelayed({
-            val intent = Intent(this, GiftcardList::class.java)
+            val intent = Intent(this, GiftCardListView::class.java)
             startActivity(intent)
             overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
             finish()

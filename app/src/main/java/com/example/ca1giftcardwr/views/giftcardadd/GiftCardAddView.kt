@@ -1,55 +1,43 @@
-package com.example.ca1giftcardwr.activities
+package com.example.ca1giftcardwr.views.giftcardadd
 
-import android.os.Bundle
-import androidx.appcompat.app.AppCompatActivity
-import com.example.ca1giftcardwr.databinding.GiftcardAddBinding
-import com.example.ca1giftcardwr.main.MainApp
-import com.example.ca1giftcardwr.models.GiftCardModel
-import com.google.android.material.snackbar.Snackbar
-import timber.log.Timber.Forest.i
 import android.app.DatePickerDialog
+import android.os.Bundle
+import android.view.Menu
+import android.view.MenuItem
+import androidx.appcompat.app.AppCompatActivity
+import com.example.ca1giftcardwr.R
+import com.example.ca1giftcardwr.databinding.GiftcardAddBinding
+import com.google.android.material.snackbar.Snackbar
 import java.util.Calendar
 
-class GiftCardAdd : AppCompatActivity() {
+class GiftCardAddView : AppCompatActivity() {
 
     private lateinit var binding: GiftcardAddBinding
-    lateinit var app: MainApp
-    var giftCard = GiftCardModel()
+    private lateinit var presenter: GiftCardAddPresenter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = GiftcardAddBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        app = application as MainApp
+        presenter = GiftCardAddPresenter(this)
 
         setSupportActionBar(binding.toolbarAdd)
 
-
         binding.giftCardExpiry.setOnClickListener {
-            showDatePicker() }
+            showDatePicker()
+        }
 
         binding.btnAdd.setOnClickListener {
-            giftCard.storeName = binding.giftCardStore.text.toString()
+            val success = presenter.doAddGiftCard(
+                storeName = binding.giftCardStore.text.toString(),
+                balance = binding.giftCardBalance.text.toString(),
+                cardNumber = binding.giftCardNumber.text.toString(),
+                expiryDate = binding.giftCardExpiry.text.toString(),
+                notes = binding.giftCardNotes.text.toString()
+            )
 
-            val balanceText = binding.giftCardBalance.text.toString()
-            giftCard.balance = if (balanceText.isNotEmpty()) {
-                try {
-                    balanceText.toDouble()
-                } catch (e: NumberFormatException) {
-                    0.0
-                }
-            } else {
-                0.0
-            }
-
-            giftCard.cardNumber = binding.giftCardNumber.text.toString()
-            giftCard.expiryDate = binding.giftCardExpiry.text.toString()
-            giftCard.notes = binding.giftCardNotes.text.toString()
-
-            if (giftCard.storeName.isNotEmpty() && giftCard.balance > 0) {
-                app.add(giftCard.copy())
-                i("Gift Card added: $giftCard")
+            if (success) {
                 setResult(RESULT_OK)
                 finish()
             } else {
@@ -57,6 +45,18 @@ class GiftCardAdd : AppCompatActivity() {
                     .show()
             }
         }
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        menuInflater.inflate(R.menu.menu_giftcard_add, menu)
+        return super.onCreateOptionsMenu(menu)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
+            R.id.item_cancel -> presenter.doCancel()
+        }
+        return super.onOptionsItemSelected(item)
     }
 
     private fun showDatePicker() {
@@ -75,7 +75,6 @@ class GiftCardAdd : AppCompatActivity() {
             month,
             day
         )
-
         datePickerDialog.show()
     }
 }

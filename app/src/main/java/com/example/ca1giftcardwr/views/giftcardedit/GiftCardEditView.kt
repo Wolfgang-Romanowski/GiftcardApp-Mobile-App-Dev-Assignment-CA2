@@ -1,41 +1,24 @@
-package com.example.ca1giftcardwr.activities
+package com.example.ca1giftcardwr.views.giftcardedit
 
 import android.app.DatePickerDialog
-import android.os.Build
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.example.ca1giftcardwr.databinding.GiftcardEditBinding
-import com.example.ca1giftcardwr.main.MainApp
-import com.example.ca1giftcardwr.models.GiftCardModel
 import com.google.android.material.snackbar.Snackbar
 import java.util.Calendar
 
-class GiftCardEdit : AppCompatActivity() {
+class GiftCardEditView : AppCompatActivity() {
 
     private lateinit var binding: GiftcardEditBinding
-    lateinit var app: MainApp
-    lateinit var giftCard: GiftCardModel
+    private lateinit var presenter: GiftCardEditPresenter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = GiftcardEditBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        app = application as MainApp
-
-        giftCard = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            intent.getParcelableExtra("gift_card", GiftCardModel::class.java)!!
-        } else {
-            @Suppress("DEPRECATION")
-            intent.getParcelableExtra<GiftCardModel>("gift_card")!!
-        }
-
-        binding.giftCardStore.setText(giftCard.storeName)
-        binding.giftCardBalance.setText(giftCard.balance.toString())
-        binding.giftCardNumber.setText(giftCard.cardNumber)
-        binding.giftCardExpiry.setText(giftCard.expiryDate)
-        binding.giftCardNotes.setText(giftCard.notes)
-
+        presenter = GiftCardEditPresenter(this)
+        showGiftCard(presenter.giftCard)
         setSupportActionBar(binding.toolbarEdit)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
@@ -44,25 +27,15 @@ class GiftCardEdit : AppCompatActivity() {
         }
 
         binding.btnUpdate.setOnClickListener {
-            giftCard.storeName = binding.giftCardStore.text.toString()
+            val success = presenter.doUpdateGiftCard(
+                storeName = binding.giftCardStore.text.toString(),
+                balance = binding.giftCardBalance.text.toString(),
+                cardNumber = binding.giftCardNumber.text.toString(),
+                expiryDate = binding.giftCardExpiry.text.toString(),
+                notes = binding.giftCardNotes.text.toString()
+            )
 
-            val balanceText = binding.giftCardBalance.text.toString()
-            giftCard.balance = if (balanceText.isNotEmpty()) {
-                try {
-                    balanceText.toDouble()
-                } catch (e: NumberFormatException) {
-                    0.0
-                }
-            } else {
-                0.0
-            }
-
-            giftCard.cardNumber = binding.giftCardNumber.text.toString()
-            giftCard.expiryDate = binding.giftCardExpiry.text.toString()
-            giftCard.notes = binding.giftCardNotes.text.toString()
-
-            if (giftCard.storeName.isNotEmpty() && giftCard.balance > 0) {
-                app.update(giftCard)
+            if (success) {
                 setResult(RESULT_OK)
                 finish()
             } else {
@@ -72,10 +45,18 @@ class GiftCardEdit : AppCompatActivity() {
         }
 
         binding.btnDelete.setOnClickListener {
-            app.delete(giftCard)
+            presenter.doDelete()
             setResult(RESULT_OK)
             finish()
         }
+    }
+
+    private fun showGiftCard(giftCard: com.example.ca1giftcardwr.models.GiftCardModel) {
+        binding.giftCardStore.setText(giftCard.storeName)
+        binding.giftCardBalance.setText(giftCard.balance.toString())
+        binding.giftCardNumber.setText(giftCard.cardNumber)
+        binding.giftCardExpiry.setText(giftCard.expiryDate)
+        binding.giftCardNotes.setText(giftCard.notes)
     }
 
     private fun showDatePicker() {
@@ -94,7 +75,6 @@ class GiftCardEdit : AppCompatActivity() {
             month,
             day
         )
-
         datePickerDialog.show()
     }
 
