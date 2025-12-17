@@ -8,6 +8,7 @@ import android.view.View
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import com.example.ca1giftcardwr.R
 import com.example.ca1giftcardwr.databinding.GiftcardEditBinding
 import com.example.ca1giftcardwr.models.Location
 import com.example.ca1giftcardwr.views.editlocation.EditLocationView
@@ -149,21 +150,38 @@ class GiftCardEditView : AppCompatActivity() {
 
     private fun showDatePicker() {
         val calendar = Calendar.getInstance()
-        val year = calendar.get(Calendar.YEAR)
-        val month = calendar.get(Calendar.MONTH)
-        val day = calendar.get(Calendar.DAY_OF_MONTH)
+        val currentYear = calendar.get(Calendar.YEAR)
+        val currentMonth = calendar.get(Calendar.MONTH)
+        val months = arrayOf("January", "February", "March", "April", "May", "June",
+            "July", "August", "September", "October", "November", "December")
+        val years = (currentYear..currentYear + 10).map { it.toString() }.toTypedArray()
+        val dialogView = layoutInflater.inflate(R.layout.dialog_month_year_picker, null)
+        val monthSpinner = dialogView.findViewById<android.widget.Spinner>(R.id.monthSpinner)
+        val yearSpinner = dialogView.findViewById<android.widget.Spinner>(R.id.yearSpinner)
+        val spinnerLayout = android.R.layout.simple_spinner_dropdown_item
 
-        val datePickerDialog = DatePickerDialog(
-            this,
-            { _, selectedYear, selectedMonth, _ ->
-                val formattedDate = String.format("%02d/%04d", selectedMonth + 1, selectedYear)
+        monthSpinner.adapter = android.widget.ArrayAdapter(this, spinnerLayout, months)
+        yearSpinner.adapter = android.widget.ArrayAdapter(this, spinnerLayout, years)
+
+        monthSpinner.setSelection(currentMonth)
+        yearSpinner.setSelection(0)
+
+        val dialog = com.google.android.material.dialog.MaterialAlertDialogBuilder(this)
+            .setTitle("Select Expiry Date")
+            .setView(dialogView)
+            .setPositiveButton("Set") { _, _ ->
+                val selectedMonth = monthSpinner.selectedItemPosition + 1
+                val selectedYear = years[yearSpinner.selectedItemPosition]
+                val formattedDate = String.format("%02d/%s", selectedMonth, selectedYear)
                 binding.giftCardExpiry.setText(formattedDate)
-            },
-            year,
-            month,
-            day
-        )
-        datePickerDialog.show()
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
+
+        dialog.getButton(androidx.appcompat.app.AlertDialog.BUTTON_POSITIVE)
+            ?.setTextColor(getColor(R.color.accent_light))
+        dialog.getButton(androidx.appcompat.app.AlertDialog.BUTTON_NEGATIVE)
+            ?.setTextColor(getColor(R.color.accent_light))
     }
 
     override fun onSupportNavigateUp(): Boolean {
