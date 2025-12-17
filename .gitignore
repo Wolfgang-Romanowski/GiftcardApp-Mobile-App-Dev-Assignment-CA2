@@ -7,3 +7,6 @@ app/src/main/res/values/keys.xml
 
 # secrets
 app/src/main/res/values/keys.xml
+
+# firebase secrets
+app/google-services.json
