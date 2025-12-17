@@ -11,7 +11,7 @@
             android:id="@+id/appBarLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@color/colorAccent"
+            android:background="?attr/colorPrimary"
             app:layout_constraintTop_toTopOf="parent">
 
         <androidx.appcompat.widget.Toolbar
@@ -19,7 +19,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 app:title="Add Gift Card"
-                app:titleTextColor="@color/white" />
+                app:titleTextColor="?attr/colorOnPrimary" />
     </com.google.android.material.appbar.AppBarLayout>
 
     <ScrollView
@@ -112,7 +112,7 @@
                     android:layout_height="wrap_content"
                     android:text="@string/add_gift_card"
                     android:textColor="@color/white"
-                    android:backgroundTint="@color/colorAccent" />
+                    android:backgroundTint="?attr/colorAccent" />
 
         </LinearLayout>
     </ScrollView>
