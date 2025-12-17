@@ -7,7 +7,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:fitsSystemWindows="true"
-        tools:context=".activities.GiftcardList">
+        tools:context=".views.giftcardlist.GiftCardListView">
 
     <androidx.coordinatorlayout.widget.CoordinatorLayout
             android:layout_width="match_parent"
@@ -38,6 +38,7 @@
                 android:scrollbars="vertical"
                 app:layout_behavior="@string/appbar_scrolling_view_behavior" />
 
+        <!-- THIS IS THE EMPTY VIEW - was replaced incorrectly -->
         <LinearLayout
                 android:id="@+id/emptyView"
                 android:layout_width="match_parent"

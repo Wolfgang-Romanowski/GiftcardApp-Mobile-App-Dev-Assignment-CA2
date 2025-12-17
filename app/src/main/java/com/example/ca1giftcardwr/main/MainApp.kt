@@ -4,18 +4,29 @@ import android.app.Application
 import androidx.appcompat.app.AppCompatDelegate
 import com.example.ca1giftcardwr.models.GiftCardModel
 import com.example.ca1giftcardwr.models.GiftCardJSONStore
+import com.example.ca1giftcardwr.models.GiftCardFirebaseStore
 import timber.log.Timber
 import timber.log.Timber.Forest.i
 
 class MainApp : Application() {
 
-    lateinit var giftCardStore: GiftCardJSONStore
+    //json
+    //lateinit var giftCardStore: GiftCardJSONStore
+
+    // firebase Storage
+    lateinit var giftCardStore: GiftCardFirebaseStore
 
     override fun onCreate() {
         super.onCreate()
         Timber.plant(Timber.DebugTree())
-        giftCardStore = GiftCardJSONStore(applicationContext)
-        i("Gift Card Manager started with ${giftCardStore.findAll().size} cards")
+
+        //json
+        //giftCardStore = GiftCardJSONStore(applicationContext)
+
+        // firebase
+        giftCardStore = GiftCardFirebaseStore()
+
+        i("Gift Card Manager started")
 
         val prefs = getSharedPreferences("app_prefs", MODE_PRIVATE)
         val nightMode = prefs.getInt("night_mode", AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
@@ -43,6 +54,10 @@ class MainApp : Application() {
     fun delete(giftCard: GiftCardModel) {
         giftCardStore.delete(giftCard)
         logAll()
+    }
+
+    fun setOnDataChangedListener(listener: () -> Unit) {
+        giftCardStore.setOnDataChangedListener(listener)
     }
 
     private fun logAll() {

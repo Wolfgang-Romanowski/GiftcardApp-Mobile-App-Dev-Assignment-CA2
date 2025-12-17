@@ -16,6 +16,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.ca1giftcardwr.R
 import com.example.ca1giftcardwr.databinding.CardGiftcardBinding
 import com.example.ca1giftcardwr.databinding.GiftcardListBinding
+import com.example.ca1giftcardwr.main.MainApp
 import com.example.ca1giftcardwr.models.GiftCardModel
 import com.google.android.material.navigation.NavigationView
 import com.google.android.material.snackbar.Snackbar
@@ -41,8 +42,11 @@ class GiftCardListView : AppCompatActivity(), GiftCardListener,
         binding = GiftcardListBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // Initialize presenter
         presenter = GiftCardListPresenter(this)
+
+        (application as MainApp).setOnDataChangedListener {
+            runOnUiThread { loadGiftCards() }
+        }
 
         setSupportActionBar(binding.toolbar)
         setupNavigationDrawer()
@@ -79,16 +83,20 @@ class GiftCardListView : AppCompatActivity(), GiftCardListener,
 
             override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
                 val position = viewHolder.bindingAdapterPosition
-                val cards = presenter.getGiftCards() as ArrayList<GiftCardModel>
+                val cards = presenter.getGiftCards()
+
+                if (position < 0 || position >= cards.size) {
+                    loadGiftCards()
+                    return
+                }
+
                 val deletedCard = cards[position]
 
                 presenter.doDeleteGiftCard(deletedCard)
-                loadGiftCards()
 
                 Snackbar.make(binding.root, "Card deleted", Snackbar.LENGTH_LONG)
                     .setAction("UNDO") {
                         presenter.doUndoDelete(deletedCard)
-                        loadGiftCards()
                     }
                     .show()
             }
@@ -128,7 +136,6 @@ class GiftCardListView : AppCompatActivity(), GiftCardListener,
             super.onBackPressed()
         }
     }
-
     private fun loadGiftCards() {
         val filteredCards = presenter.filterGiftCards(searchQuery)
 
@@ -172,6 +179,7 @@ class GiftCardListView : AppCompatActivity(), GiftCardListener,
     override fun onGiftCardClick(giftCard: GiftCardModel) {
         presenter.doEditGiftCard(giftCard)
     }
+
     fun onRefresh() {
         loadGiftCards()
     }
@@ -214,7 +222,6 @@ class GiftCardAdapter(
                 "No expiry date"
             }
 
-            // Show image or initial
             if (giftCard.image.isNotEmpty()) {
                 try {
                     binding.storeImage.setImageURI(android.net.Uri.parse(giftCard.image))
@@ -230,6 +237,7 @@ class GiftCardAdapter(
                 binding.storeInitial.visibility = View.VISIBLE
                 binding.storeInitial.text = giftCard.storeName.firstOrNull()?.uppercase() ?: "?"
             }
+
             if (giftCard.zoom != 0f) {
                 binding.giftCardLocation.visibility = View.VISIBLE
                 try {
