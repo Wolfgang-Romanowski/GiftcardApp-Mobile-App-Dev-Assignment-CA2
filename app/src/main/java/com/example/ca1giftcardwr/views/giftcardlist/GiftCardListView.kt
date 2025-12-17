@@ -1,16 +1,14 @@
-package com.example.ca1giftcardwr.activities
+package com.example.ca1giftcardwr.views.giftcardlist
 
-import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
-import androidx.activity.result.ActivityResultLauncher
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.view.GravityCompat
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -18,22 +16,19 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.ca1giftcardwr.R
 import com.example.ca1giftcardwr.databinding.CardGiftcardBinding
 import com.example.ca1giftcardwr.databinding.GiftcardListBinding
-import com.example.ca1giftcardwr.main.MainApp
 import com.example.ca1giftcardwr.models.GiftCardModel
 import com.google.android.material.navigation.NavigationView
 import com.google.android.material.snackbar.Snackbar
-import androidx.appcompat.app.AppCompatDelegate
 
 interface GiftCardListener {
     fun onGiftCardClick(giftCard: GiftCardModel)
 }
 
-class GiftcardList : AppCompatActivity(), GiftCardListener,
+class GiftCardListView : AppCompatActivity(), GiftCardListener,
     NavigationView.OnNavigationItemSelectedListener {
 
-    lateinit var app: MainApp
     private lateinit var binding: GiftcardListBinding
-    private lateinit var refreshIntentLauncher: ActivityResultLauncher<Intent>
+    private lateinit var presenter: GiftCardListPresenter
     private lateinit var drawerToggle: ActionBarDrawerToggle
     private var searchQuery = ""
 
@@ -42,45 +37,17 @@ class GiftcardList : AppCompatActivity(), GiftCardListener,
         binding = GiftcardListBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        app = application as MainApp
-        setSupportActionBar(binding.toolbar)
+        // Initialize presenter
+        presenter = GiftCardListPresenter(this)
 
+        setSupportActionBar(binding.toolbar)
         setupNavigationDrawer()
 
         val layoutManager = LinearLayoutManager(this)
         binding.recyclerView.layoutManager = layoutManager
 
-
-        // Swipe to delete
-        val itemTouchHelper = ItemTouchHelper(object : ItemTouchHelper.SimpleCallback(
-            0, ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT
-        ) {
-            override fun onMove(
-                recyclerView: RecyclerView,
-                viewHolder: RecyclerView.ViewHolder,
-                target: RecyclerView.ViewHolder
-            ): Boolean = false
-
-            override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
-                val position = viewHolder.bindingAdapterPosition
-                val cards = app.findAll() as ArrayList<GiftCardModel>
-                val deletedCard = cards[position]
-
-                app.delete(deletedCard)
-                loadGiftCards()
-
-                Snackbar.make(binding.root, "Card deleted", Snackbar.LENGTH_LONG)
-                    .setAction("UNDO") {
-                        app.add(deletedCard)
-                        loadGiftCards()
-                    }
-                    .show()
-            }
-        })
-        itemTouchHelper.attachToRecyclerView(binding.recyclerView)
-
+        setupSwipeToDelete()
         loadGiftCards()
-        registerRefreshCallback()
     }
 
     private fun setupNavigationDrawer() {
@@ -93,17 +60,42 @@ class GiftcardList : AppCompatActivity(), GiftCardListener,
         )
         binding.drawerLayout.addDrawerListener(drawerToggle)
         drawerToggle.syncState()
-
         binding.navView.setNavigationItemSelectedListener(this)
+    }
+
+    private fun setupSwipeToDelete() {
+        val itemTouchHelper = ItemTouchHelper(object : ItemTouchHelper.SimpleCallback(
+            0, ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT
+        ) {
+            override fun onMove(
+                recyclerView: RecyclerView,
+                viewHolder: RecyclerView.ViewHolder,
+                target: RecyclerView.ViewHolder
+            ): Boolean = false
+
+            override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+                val position = viewHolder.bindingAdapterPosition
+                val cards = presenter.getGiftCards() as ArrayList<GiftCardModel>
+                val deletedCard = cards[position]
+
+                presenter.doDeleteGiftCard(deletedCard)
+                loadGiftCards()
+
+                Snackbar.make(binding.root, "Card deleted", Snackbar.LENGTH_LONG)
+                    .setAction("UNDO") {
+                        presenter.doUndoDelete(deletedCard)
+                        loadGiftCards()
+                    }
+                    .show()
+            }
+        })
+        itemTouchHelper.attachToRecyclerView(binding.recyclerView)
     }
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.nav_cards -> {}
-            R.id.nav_add -> {
-                val intent = Intent(this, GiftCardAdd::class.java)
-                refreshIntentLauncher.launch(intent)
-            }
+            R.id.nav_add -> presenter.doAddGiftCard()
             R.id.nav_night_mode -> {
                 val currentMode = AppCompatDelegate.getDefaultNightMode()
                 if (currentMode == AppCompatDelegate.MODE_NIGHT_YES) {
@@ -132,19 +124,7 @@ class GiftcardList : AppCompatActivity(), GiftCardListener,
     }
 
     private fun loadGiftCards() {
-        filterGiftCards()
-    }
-
-    private fun filterGiftCards() {
-        val allCards = app.findAll()
-        val filteredCards = if (searchQuery.isEmpty()) {
-            allCards
-        } else {
-            allCards.filter { card ->
-                card.storeName.contains(searchQuery, ignoreCase = true) ||
-                        card.cardNumber.contains(searchQuery, ignoreCase = true)
-            }
-        }
+        val filteredCards = presenter.filterGiftCards(searchQuery)
 
         if (filteredCards.isEmpty()) {
             binding.recyclerView.visibility = View.GONE
@@ -164,14 +144,12 @@ class GiftcardList : AppCompatActivity(), GiftCardListener,
 
         searchView.setOnQueryTextListener(object : androidx.appcompat.widget.SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query: String?): Boolean = false
-
             override fun onQueryTextChange(newText: String?): Boolean {
                 searchQuery = newText ?: ""
-                filterGiftCards()
+                loadGiftCards()
                 return true
             }
         })
-
         return super.onCreateOptionsMenu(menu)
     }
 
@@ -180,28 +158,16 @@ class GiftcardList : AppCompatActivity(), GiftCardListener,
             return true
         }
         when (item.itemId) {
-            R.id.item_add -> {
-                val launcherIntent = Intent(this, GiftCardAdd::class.java)
-                refreshIntentLauncher.launch(launcherIntent)
-            }
+            R.id.item_add -> presenter.doAddGiftCard()
         }
         return super.onOptionsItemSelected(item)
     }
 
-    private fun registerRefreshCallback() {
-        refreshIntentLauncher =
-            registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-                if (result.resultCode == RESULT_OK) {
-                    loadGiftCards()
-                }
-            }
-    }
-
     override fun onGiftCardClick(giftCard: GiftCardModel) {
-        val intent = Intent(this, GiftCardEdit::class.java).apply {
-            putExtra("gift_card", giftCard)
-        }
-        refreshIntentLauncher.launch(intent)
+        presenter.doEditGiftCard(giftCard)
+    }
+    fun onRefresh() {
+        loadGiftCards()
     }
 }
 
@@ -240,7 +206,6 @@ class GiftCardAdapter(
             } else {
                 "No expiry date"
             }
-
             binding.root.setOnClickListener {
                 listener.onGiftCardClick(giftCard)
             }
