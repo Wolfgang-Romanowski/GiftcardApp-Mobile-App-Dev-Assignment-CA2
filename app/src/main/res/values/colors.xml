@@ -1,13 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="purple_200">#FFBB86FC</color>
-    <color name="purple_500">#FF6200EE</color>
-    <color name="purple_700">#FF3700B3</color>
-    <color name="teal_200">#FF03DAC5</color>
-    <color name="teal_700">#FF018786</color>
-    <color name="black">#FF000000</color>
+    <color name="background_light">#F5F5F0</color>
+    <color name="surface_light">#FFFFFF</color>
+    <color name="toolbar_light">#7B8CDE</color>
+    <color name="on_toolbar_light">#FFFFFF</color>
+    <color name="text_primary_light">#2D3436</color>
+    <color name="text_secondary_light">#636E72</color>
+    <color name="accent_light">#6C7BD8</color>
+    <color name="nav_header_light">#2D5A3D</color>
+    <color name="delete_button_light">#D63031</color>
+    <color name="card_icon_circle_light">#2D5A3D</color>
+
+    <color name="background_dark">#0D0D0D</color>
+    <color name="surface_dark">#1A1A1A</color>
+    <color name="toolbar_dark">#1A1A1A</color>
+    <color name="on_toolbar_dark">#A8B4F0</color>
+    <color name="text_primary_dark">#F0F0F0</color>
+    <color name="text_secondary_dark">#A0A0A0</color>
+    <color name="accent_dark">#A8B4F0</color>
+    <color name="nav_header_dark">#1E3D2B</color>
+    <color name="delete_button_dark">#FF7675</color>
+    <color name="card_icon_circle_dark">#3D7A5A</color>
+
+    <color name="colorPrimary">@color/toolbar_light</color>
+    <color name="colorPrimaryDark">@color/toolbar_light</color>
+    <color name="colorAccent">@color/accent_light</color>
+
     <color name="white">#FFFFFFFF</color>
-    <color name="colorPrimary">#4CAF50</color>
-    <color name="colorPrimaryDark">#388E3C</color>
-    <color name="colorAccent">#4CAF50</color>
+    <color name="black">#FF000000</color>
 </resources>

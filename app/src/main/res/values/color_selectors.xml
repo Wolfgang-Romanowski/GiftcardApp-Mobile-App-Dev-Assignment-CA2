@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="nav_header_background">@color/nav_header_light</color>
+    <color name="card_icon_background">@color/card_icon_circle_light</color>
+    <color name="delete_button">@color/delete_button_light</color>
+</resources>

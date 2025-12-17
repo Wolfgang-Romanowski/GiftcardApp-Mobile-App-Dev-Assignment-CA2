@@ -12,12 +12,12 @@
     <androidx.coordinatorlayout.widget.CoordinatorLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="#F5F5F5">
+            android:background="?attr/colorSurface">
 
         <com.google.android.material.appbar.AppBarLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@color/colorPrimary"
+                android:background="?attr/colorPrimary"
                 app:elevation="4dp">
 
             <androidx.appcompat.widget.Toolbar
@@ -25,7 +25,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="?attr/actionBarSize"
                     app:title="My Gift Cards"
-                    app:titleTextColor="@android:color/white" />
+                    app:titleTextColor="?attr/colorOnPrimary" />
 
         </com.google.android.material.appbar.AppBarLayout>
 
@@ -53,7 +53,7 @@
                     android:layout_height="80dp"
                     android:alpha="0.4"
                     android:src="@drawable/creditcardiconpng4401"
-                    app:tint="@color/colorPrimary"
+                    app:tint="?attr/colorAccent"
                     android:contentDescription="No cards" />
 
             <TextView
@@ -63,7 +63,7 @@
                     android:text="No Gift Cards Yet"
                     android:textSize="18sp"
                     android:textStyle="bold"
-                    android:textColor="#333333" />
+                    android:textColor="?android:attr/textColorPrimary" />
 
             <TextView
                     android:layout_width="wrap_content"
@@ -72,17 +72,18 @@
                     android:gravity="center"
                     android:text="Tap + to add your first card"
                     android:textSize="14sp"
-                    android:textColor="#666666" />
+                    android:textColor="?android:attr/textColorSecondary" />
 
         </LinearLayout>
 
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
+
     <com.google.android.material.navigation.NavigationView
             android:id="@+id/navView"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_gravity="start"
-            android:background="@android:color/white"
+            android:background="?attr/colorSurface"
             app:headerLayout="@layout/nav_header"
             app:menu="@menu/drawer_menu" />
 

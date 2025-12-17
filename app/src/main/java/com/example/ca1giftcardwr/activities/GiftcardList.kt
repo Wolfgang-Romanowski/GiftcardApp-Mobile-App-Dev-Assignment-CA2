@@ -22,6 +22,7 @@ import com.example.ca1giftcardwr.main.MainApp
 import com.example.ca1giftcardwr.models.GiftCardModel
 import com.google.android.material.navigation.NavigationView
 import com.google.android.material.snackbar.Snackbar
+import androidx.appcompat.app.AppCompatDelegate
 
 interface GiftCardListener {
     fun onGiftCardClick(giftCard: GiftCardModel)
@@ -102,6 +103,15 @@ class GiftcardList : AppCompatActivity(), GiftCardListener,
             R.id.nav_add -> {
                 val intent = Intent(this, GiftCardAdd::class.java)
                 refreshIntentLauncher.launch(intent)
+            }
+            R.id.nav_night_mode -> {
+                val currentMode = AppCompatDelegate.getDefaultNightMode()
+                if (currentMode == AppCompatDelegate.MODE_NIGHT_YES) {
+                    AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
+                } else {
+                    AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
+                }
+                recreate()
             }
             R.id.nav_about -> {
                 Snackbar.make(binding.root, "Gift Card Manager v2.0", Snackbar.LENGTH_SHORT).show()

@@ -4,6 +4,11 @@
     <group android:checkableBehavior="single">
 
         <item
+                android:id="@+id/nav_night_mode"
+                android:icon="@drawable/darktheme2"
+                android:title="Toggle Dark Mode" />
+
+        <item
                 android:id="@+id/nav_cards"
                 android:icon="@android:drawable/ic_menu_agenda"
                 android:title="My Gift Cards" />
