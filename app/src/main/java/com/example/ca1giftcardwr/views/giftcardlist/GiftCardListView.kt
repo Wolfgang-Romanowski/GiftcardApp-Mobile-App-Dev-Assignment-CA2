@@ -34,6 +34,10 @@ class GiftCardListView : AppCompatActivity(), GiftCardListener,
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val prefs = getSharedPreferences("app_prefs", MODE_PRIVATE)
+        val nightMode = prefs.getInt("night_mode", AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
+        AppCompatDelegate.setDefaultNightMode(nightMode)
+
         binding = GiftcardListBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
@@ -98,12 +102,14 @@ class GiftCardListView : AppCompatActivity(), GiftCardListener,
             R.id.nav_add -> presenter.doAddGiftCard()
             R.id.nav_night_mode -> {
                 val currentMode = AppCompatDelegate.getDefaultNightMode()
-                if (currentMode == AppCompatDelegate.MODE_NIGHT_YES) {
-                    AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
+                val newMode = if (currentMode == AppCompatDelegate.MODE_NIGHT_YES) {
+                    AppCompatDelegate.MODE_NIGHT_NO
                 } else {
-                    AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
+                    AppCompatDelegate.MODE_NIGHT_YES
                 }
-                recreate()
+                val prefs = getSharedPreferences("app_prefs", MODE_PRIVATE)
+                prefs.edit().putInt("night_mode", newMode).apply()
+                AppCompatDelegate.setDefaultNightMode(newMode)
             }
             R.id.nav_about -> {
                 Snackbar.make(binding.root, "Gift Card Manager v2.0", Snackbar.LENGTH_SHORT).show()
@@ -201,11 +207,49 @@ class GiftCardAdapter(
         fun bind(giftCard: GiftCardModel, listener: GiftCardListener) {
             binding.giftCardStore.text = giftCard.storeName
             binding.giftCardBalance.text = "$${String.format("%.2f", giftCard.balance)}"
+
             binding.giftCardExpiry.text = if (giftCard.expiryDate.isNotEmpty()) {
                 "Expires: ${giftCard.expiryDate}"
             } else {
                 "No expiry date"
             }
+
+            // Show image or initial
+            if (giftCard.image.isNotEmpty()) {
+                try {
+                    binding.storeImage.setImageURI(android.net.Uri.parse(giftCard.image))
+                    binding.storeImage.visibility = View.VISIBLE
+                    binding.storeInitial.visibility = View.GONE
+                } catch (e: Exception) {
+                    binding.storeImage.visibility = View.GONE
+                    binding.storeInitial.visibility = View.VISIBLE
+                    binding.storeInitial.text = giftCard.storeName.firstOrNull()?.uppercase() ?: "?"
+                }
+            } else {
+                binding.storeImage.visibility = View.GONE
+                binding.storeInitial.visibility = View.VISIBLE
+                binding.storeInitial.text = giftCard.storeName.firstOrNull()?.uppercase() ?: "?"
+            }
+            if (giftCard.zoom != 0f) {
+                binding.giftCardLocation.visibility = View.VISIBLE
+                try {
+                    val geocoder = android.location.Geocoder(binding.root.context, java.util.Locale.getDefault())
+                    @Suppress("DEPRECATION")
+                    val addresses = geocoder.getFromLocation(giftCard.lat, giftCard.lng, 1)
+                    if (!addresses.isNullOrEmpty()) {
+                        val address = addresses[0]
+                        val locationText = address.locality ?: address.subAdminArea ?: address.adminArea ?: "Location set"
+                        binding.giftCardLocation.text = "📍 $locationText"
+                    } else {
+                        binding.giftCardLocation.text = "📍 Location set"
+                    }
+                } catch (e: Exception) {
+                    binding.giftCardLocation.text = "📍 Location set"
+                }
+            } else {
+                binding.giftCardLocation.visibility = View.GONE
+            }
+
             binding.root.setOnClickListener {
                 listener.onGiftCardClick(giftCard)
             }

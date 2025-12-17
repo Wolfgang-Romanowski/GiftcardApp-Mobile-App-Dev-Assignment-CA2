@@ -23,13 +23,21 @@ class GiftCardEditPresenter(private val view: GiftCardEditView) {
         balance: String,
         cardNumber: String,
         expiryDate: String,
-        notes: String
+        notes: String,
+        lat: Double,
+        lng: Double,
+        zoom: Float,
+        image: String
     ): Boolean {
         giftCard.storeName = storeName
         giftCard.balance = parseBalance(balance)
         giftCard.cardNumber = cardNumber
         giftCard.expiryDate = expiryDate
         giftCard.notes = notes
+        giftCard.lat = lat
+        giftCard.lng = lng
+        giftCard.zoom = zoom
+        giftCard.image = image
 
         return if (giftCard.storeName.isNotEmpty() && giftCard.balance > 0) {
             app.update(giftCard)

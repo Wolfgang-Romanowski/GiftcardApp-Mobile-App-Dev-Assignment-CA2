@@ -5,7 +5,7 @@
         xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context=".activities.GiftCardAdd">
+        tools:context=".views.giftcardadd.GiftCardAddView">
 
     <com.google.android.material.appbar.AppBarLayout
             android:id="@+id/appBarLayout"
@@ -60,9 +60,6 @@
                         android:inputType="numberDecimal" />
             </com.google.android.material.textfield.TextInputLayout>
 
-
-
-
             <com.google.android.material.textfield.TextInputLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -106,6 +103,34 @@
                         android:minLines="3" />
             </com.google.android.material.textfield.TextInputLayout>
 
+            <ImageView
+                    android:id="@+id/giftCardImage"
+                    android:layout_width="match_parent"
+                    android:layout_height="150dp"
+                    android:layout_marginBottom="16dp"
+                    android:scaleType="centerCrop"
+                    android:background="#E0E0E0"
+                    android:visibility="gone"
+                    android:contentDescription="Gift card image" />
+
+            <Button
+                    android:id="@+id/btnChooseImage"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="16dp"
+                    android:text="Choose Image"
+                    android:textColor="?attr/colorOnSurface"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton" />
+
+            <Button
+                    android:id="@+id/btnSetLocation"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="16dp"
+                    android:text="@string/button_location"
+                    android:textColor="?attr/colorOnSurface"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton" />
+
             <Button
                     android:id="@+id/btnAdd"
                     android:layout_width="match_parent"
@@ -113,16 +138,6 @@
                     android:text="@string/add_gift_card"
                     android:textColor="@color/white"
                     android:backgroundTint="?attr/colorAccent" />
-
-            <menu xmlns:android="http://schemas.android.com/apk/res/android"
-                  xmlns:app="http://schemas.android.com/apk/res-auto">
-
-                <item
-                        android:id="@+id/item_cancel"
-                        android:title="Cancel"
-                        app:showAsAction="always" />
-
-            </menu>
 
         </LinearLayout>
     </ScrollView>
